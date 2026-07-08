@@ -1,0 +1,29 @@
+# Data lake layers never go in git — the pipeline can rebuild them
+data/
+*.duckdb
+*.duckdb.wal
+*.json.gz
+
+# Python
+__pycache__/
+*.pyc
+*.egg-info/
+.venv/
+venv/
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
+
+# dbt (Phase 2+)
+target/
+dbt_packages/
+logs/
+package-lock.yml
+
+# Secrets & local env
+.env
+profiles.yml.local
+
+# OS noise
+.DS_Store
