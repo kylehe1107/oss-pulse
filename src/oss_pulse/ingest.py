@@ -194,7 +194,9 @@ def main(argv: list[str] | None = None) -> int:
         "run_complete",
         hours_processed=processed,
         last_ingested=str(state.last_ingested_hour()),
-        raw_partition_example=str(partition_dir(args.data_dir / "raw", hours[0])),
+        raw_partition_example=str(
+            partition_dir(args.data_dir / "raw" / "gharchive" / "events", hours[0])
+        ),
     )
     return 0
 
