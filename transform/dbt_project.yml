@@ -1,0 +1,28 @@
+name: "oss_pulse"
+version: "1.0.0"
+config-version: 2
+
+profile: "oss_pulse"
+
+model-paths: ["models"]
+macro-paths: ["macros"]
+test-paths: ["tests"]
+
+target-path: "target"
+clean-targets: ["target", "dbt_packages"]
+
+models:
+  oss_pulse:
+    staging:
+      # Views: staging is a thin, always-fresh window onto the raw lake.
+      # No storage cost; every query reads the latest parquet.
+      +materialized: view
+      +schema: staging
+    intermediate:
+      +materialized: view
+      +schema: intermediate
+    marts:
+      # Tables: marts are queried repeatedly by the dashboard, so we pay the
+      # build cost once instead of rescanning the lake per query.
+      +materialized: table
+      +schema: marts

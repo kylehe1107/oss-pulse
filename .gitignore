@@ -20,6 +20,7 @@ target/
 dbt_packages/
 logs/
 package-lock.yml
+transform/.user.yml
 
 # Secrets & local env
 .env

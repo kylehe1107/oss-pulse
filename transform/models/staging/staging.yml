@@ -1,0 +1,75 @@
+version: 2
+
+models:
+  - name: stg_gharchive__events
+    description: >
+      Silver layer: one row per GitHub event, deduplicated on event_id (latest
+      ingested copy wins) with derived date/hour columns. Materialized as a
+      view so it always reflects the current state of the raw lake.
+    columns:
+      - name: event_id
+        description: GitHub's unique event id. Primary key of the model.
+        tests:
+          - unique
+          - not_null
+      - name: event_type
+        description: The GitHub event type; only the 7 ingested types may appear.
+        tests:
+          - not_null
+          - accepted_values:
+              values:
+                - PushEvent
+                - PullRequestEvent
+                - IssuesEvent
+                - WatchEvent
+                - ForkEvent
+                - CreateEvent
+                - ReleaseEvent
+      - name: actor_id
+        description: Numeric id of the acting user/bot.
+        tests:
+          - not_null
+      - name: actor_login
+        description: Actor login at event time.
+      - name: repo_id
+        description: Numeric id of the repository.
+        tests:
+          - not_null
+      - name: repo_name
+        description: '"owner/name" at event time.'
+      - name: org_login
+        description: Owning organization login, null for user-owned repos.
+      - name: created_at
+        description: Event timestamp (UTC) from GitHub.
+        tests:
+          - not_null
+      - name: event_date
+        description: created_at cast to date; join key to dim_date.
+        tests:
+          - not_null
+      - name: event_hour_ts
+        description: created_at truncated to the hour.
+      - name: payload_action
+        description: Payload action (opened/closed/started/...), null for pushes.
+      - name: pr_merged
+        description: Whether the PR merged (PullRequestEvent closed events).
+      - name: pr_additions
+        description: Lines added in the PR.
+      - name: pr_deletions
+        description: Lines deleted in the PR.
+      - name: pr_changed_files
+        description: Files changed in the PR.
+      - name: repo_language
+        description: Base repo primary language (PullRequestEvent payloads only).
+      - name: repo_stars
+        description: Base repo stargazer count at PR event time.
+      - name: push_distinct_size
+        description: Distinct commits in a push.
+      - name: create_ref_type
+        description: What a CreateEvent created (repository/branch/tag).
+      - name: ingested_at
+        description: When our pipeline landed the row (UTC).
+        tests:
+          - not_null
+      - name: source_file
+        description: GH Archive source URL (lineage).

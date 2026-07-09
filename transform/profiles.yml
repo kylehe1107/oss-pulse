@@ -1,0 +1,10 @@
+# Local development target: DuckDB file in the data/ directory (gitignored).
+# Phase 4 adds a `prod` output of type bigquery; credentials will come from
+# env vars, never from this file.
+oss_pulse:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: "{{ env_var('OSS_PULSE_DB_PATH', '../data/warehouse/oss_pulse.duckdb') }}"
+      threads: 4

@@ -1,0 +1,21 @@
+version: 2
+
+models:
+  - name: int_repo_attributes
+    description: >
+      One row per repo that had at least one PullRequestEvent: latest observed
+      language and star count, extracted from PR payloads (the only language
+      signal in the events firehose). Repos without PR activity in the window
+      are absent by design and surface with null language in dim_repo.
+    columns:
+      - name: repo_id
+        description: Repository id. Primary key of the model.
+        tests:
+          - unique
+          - not_null
+      - name: language
+        description: Latest non-null primary language observed for the repo.
+      - name: stars
+        description: Latest stargazer count observed for the repo.
+        tests:
+          - non_negative

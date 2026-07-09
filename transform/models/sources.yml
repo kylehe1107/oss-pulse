@@ -1,0 +1,67 @@
+version: 2
+
+sources:
+  - name: gharchive
+    description: >
+      Raw lake (bronze): hive-partitioned Parquet written by the Python
+      ingestion pipeline (src/oss_pulse/ingest.py). One file per UTC hour,
+      7 event types, explicitly-typed columns. dbt never writes here.
+    schema: raw
+    tables:
+      - name: events
+        description: >
+          One row per public GitHub event. Idempotent by construction:
+          re-ingesting an hour atomically replaces its partition.
+        meta:
+          external_location: >-
+            read_parquet('{{ env_var('OSS_PULSE_DATA_DIR', '../data') }}/raw/gharchive/events/*/*/*.parquet',
+            hive_partitioning = true)
+        loaded_at_field: ingested_at
+        freshness:
+          # GH Archive publishes hourly; if our lake is >36h stale the
+          # schedule is broken (warn), >96h and downstream marts are lying
+          # about "momentum" (error).
+          warn_after: {count: 36, period: hour}
+          error_after: {count: 96, period: hour}
+        columns:
+          - name: event_id
+            description: GitHub's globally unique event id (string).
+          - name: event_type
+            description: One of the 7 ingested GitHub event types.
+          - name: created_at
+            description: Event timestamp (UTC) assigned by GitHub.
+          - name: actor_id
+            description: Numeric id of the user/bot that performed the event.
+          - name: actor_login
+            description: Login of the actor at event time (can change over time).
+          - name: repo_id
+            description: Numeric id of the repository the event occurred in.
+          - name: repo_name
+            description: '"owner/name" at event time (renames possible).'
+          - name: org_login
+            description: Organization login if the repo belongs to an org, else null.
+          - name: payload_action
+            description: Payload action (e.g. opened/closed/started), null for pushes.
+          - name: pr_merged
+            description: For PullRequestEvent, whether the PR was merged. Null otherwise.
+          - name: pr_additions
+            description: Lines added in the PR (PullRequestEvent only).
+          - name: pr_deletions
+            description: Lines deleted in the PR (PullRequestEvent only).
+          - name: pr_changed_files
+            description: Files changed in the PR (PullRequestEvent only).
+          - name: repo_language
+            description: >
+              Primary language of the base repo, only present on
+              PullRequestEvent payloads — the sole language signal in the
+              events firehose.
+          - name: repo_stars
+            description: Stargazer count of the base repo at PR event time.
+          - name: push_distinct_size
+            description: Distinct commit count in a push (PushEvent only).
+          - name: create_ref_type
+            description: For CreateEvent, what was created (repository/branch/tag).
+          - name: ingested_at
+            description: UTC timestamp when our pipeline landed the row (freshness field).
+          - name: source_file
+            description: GH Archive URL the row came from (lineage/debugging).
