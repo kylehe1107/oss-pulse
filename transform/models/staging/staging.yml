@@ -17,14 +17,15 @@ models:
         tests:
           - not_null
           - accepted_values:
-              values:
-                - PushEvent
-                - PullRequestEvent
-                - IssuesEvent
-                - WatchEvent
-                - ForkEvent
-                - CreateEvent
-                - ReleaseEvent
+              arguments:
+                values:
+                  - PushEvent
+                  - PullRequestEvent
+                  - IssuesEvent
+                  - WatchEvent
+                  - ForkEvent
+                  - CreateEvent
+                  - ReleaseEvent
       - name: actor_id
         description: Numeric id of the acting user/bot.
         tests:

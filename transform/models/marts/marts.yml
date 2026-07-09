@@ -19,22 +19,25 @@ models:
         tests:
           - not_null
           - relationships:
-              to: ref('dim_actor')
-              field: actor_id
+              arguments:
+                to: ref('dim_actor')
+                field: actor_id
       - name: repo_id
         description: FK to dim_repo.
         tests:
           - not_null
           - relationships:
-              to: ref('dim_repo')
-              field: repo_id
+              arguments:
+                to: ref('dim_repo')
+                field: repo_id
       - name: event_date
         description: FK to dim_date.
         tests:
           - not_null
           - relationships:
-              to: ref('dim_date')
-              field: date_day
+              arguments:
+                to: ref('dim_date')
+                field: date_day
       - name: event_type
         description: Degenerate dimension; one of the 7 ingested types.
         tests:
